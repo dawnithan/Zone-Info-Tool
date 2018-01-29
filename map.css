@@ -1,0 +1,16 @@
+#mapid {
+	width: 1200px; 
+	height: 800px;
+	margin-right: auto;
+	margin-left: auto;
+	margin-top: 20px;
+	text-align: center;
+}
+
+.delete {
+	font-size: 1.5em;
+}
+
+.info {
+	text-shadow: 1px 1px #FFFFFF
+}
