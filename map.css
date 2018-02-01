@@ -1,11 +1,5 @@
-#mapid {
-	width: 1200px; 
-	height: 800px;
-	margin-right: auto;
-	margin-left: auto;
-	margin-top: 20px;
-	text-align: center;
-}
+body { margin:0; padding:0; }
+#mapid { position: absolute; top:0; bottom:0; right:0; left:0; }
 
 .delete {
 	font-size: 1.5em;
@@ -14,3 +8,12 @@
 .info {
 	text-shadow: 1px 1px #FFFFFF
 }
+
+#info-pane {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 400;
+    padding: 1em;
+    background: white;
+  }
