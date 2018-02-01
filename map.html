@@ -42,11 +42,31 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
 	id: 'mapbox.streets'
 }).addTo(map);
 
-L.esri.featureLayer({
-    url: 'https://services6.arcgis.com/uWTLlTypaM5QTKd2/arcgis/rest/services/EDs_CSO/FeatureServer/1',
+//map.on('click', onMapClick); //COMMENT THIS OUT FOR MAP POPUPS
+
+var popEducation = L.esri.featureLayer({
+    url: 'https://services1.arcgis.com/eNO7HHeQ3rUcBllm/arcgis/rest/services/Census2016_Theme10Table4_SA/FeatureServer/0/',
 	simplifyFactor: 0.5,
-	style: { color: 'gray' }
-  }).addTo(map);
+	style: { color: '#43a2ca', weight: 1.5 }
+}).addTo(map);
+
+var popUpTemplate = "<h3>{EDNAME}</h3>Total Male Population: {T1_1AGETM}<br>Total Female Population: {T1_1AGETF}<br>Total Population: {T1_1AGETT}<br><br>------------------------<br><h4>Total Education Levels</h4>No Formal Education: {T10_4_NFT}<br>Primary Education: {T10_4_PT}<br>Lower Secondary: {T10_4_LST}<br>Upper Secondary: {T10_4_UST}<br>Technical/Vocational Qualification: {T10_4_TVT}<br>Advanced Cert/Apprenticeship: {T10_4_ACCAT}<br>Higher Certificate: {T10_4_HCT}<br>Ordinary Bachelor: {T10_4_ODNDT}<br>Honours Bachelor: {T10_4_HDPQT}<br>Postgraduate Degree: {T10_4_PDT}<br>Doctorate(Ph.D): {T10_4_DT}<br>Not Stated: {T10_4_NST}<br>Total: {T10_4_TT}";
+popEducation.bindPopup(function(layer){
+	return L.Util.template(popUpTemplate, layer.feature.properties);
+});
+
+// $.getJSON("https://opendata.arcgis.com/datasets/f1036513a92543c4a041424c2a455af7_0.geojson", function(data){
+// 	L.geoJSON(data, {
+// 		style: { 
+// 			color: '#43a2ca', 
+// 			weight: 1.5, 
+// 			opacity: 0.7 
+// 		},
+// 		onEachFeature: function(feature, layer) {
+// 			layer.bindPopup(feature.properties.);
+// 		}
+// 	}).addTo(map);
+// })
   
 L.easyButton('<span class="delete">&cross;</span>', function() {
 	map.removeLayer(circle);
@@ -54,22 +74,15 @@ L.easyButton('<span class="delete">&cross;</span>', function() {
 	console.log("Zone removed.");
 }, title="Remove Current Zone").addTo(map);
 
-map.on('click', onMapClick);
-
-info.onAdd = function (map) {
-	this._div = L.DomUtil.create('div', 'info'); //create div with class 'info'
-	this.update();
-	return this._div;
-};
-
-info.update = function (props) {
-    this._div.innerHTML = "";
-};
-
-info.addTo(map);
-
-// Spatial analysis: [1] https://github.com/turfjs/turf 
-//					 [2] https://esri.github.io/esri-leaflet/examples/spatial-queries.html
+// info.onAdd = function (map) {
+// 	this._div = L.DomUtil.create('div', 'info'); //create div with class 'info'
+// 	this.update();
+// 	return this._div;
+// };
+// info.update = function (props) {
+//     this._div.innerHTML = "";
+// };
+// info.addTo(map);
 
 function onMapClick(e) {
     marker.setLatLng(e.latlng).addTo(map);
@@ -77,13 +90,17 @@ function onMapClick(e) {
     	map.removeLayer(circle);
     }
     circle = L.circle(e.latlng, {
-    	color: '#9e7c83',
+    	color: '#936c74',
     	fillColor: '#f03',
     	fillOpacity: 0.2,
     	radius: 1000
     }).addTo(map);
     marker.bindPopup("<h3>This is a test popup.</h3>This is where information from a database might show up."+"<br><br>"+e.latlng);
-}	
+}
+
+// Spatial analysis: [1] https://github.com/turfjs/turf 
+//					 [2] https://esri.github.io/esri-leaflet/examples/spatial-queries.html
+
 </script>
 
 </body>
