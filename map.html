@@ -34,6 +34,11 @@ var marker = L.marker();
 var circle = L.circle();
 var info = L.control();
 
+var testLatLngsCity = [[51.901442, -8.491573],[51.891696, -8.491488],[51.892491, -8.479471],[51.902607, -8.479385]];
+var testLatLngsCountry = [[51.921191, -8.45089],[51.921879, -8.43544],[51.929819, -8.434668],[51.930295, -8.450718]];
+var polygon = L.polygon(testLatLngsCity, {color: "green"}).addTo(map);
+var polygon2 = L.polygon(testLatLngsCountry, {color: "purple"}).addTo(map);
+
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 	maxZoom: 18,
 	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -42,18 +47,54 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
 	id: 'mapbox.streets'
 }).addTo(map);
 
-//map.on('click', onMapClick); //COMMENT THIS OUT FOR MAP POPUPS
+map.on('click', onMapClick); //COMMENT THIS OUT FOR MAP POPUPS
 
 var popEducation = L.esri.featureLayer({
     url: 'https://services1.arcgis.com/eNO7HHeQ3rUcBllm/arcgis/rest/services/Census2016_Theme10Table4_SA/FeatureServer/0/',
 	simplifyFactor: 0.5,
+	fillOpacity: 0,
 	style: { color: '#43a2ca', weight: 1.5 }
 }).addTo(map);
 
-var popUpTemplate = "<h3>{EDNAME}</h3>Total Male Population: {T1_1AGETM}<br>Total Female Population: {T1_1AGETF}<br>Total Population: {T1_1AGETT}<br><br>------------------------<br><h4>Total Education Levels</h4>No Formal Education: {T10_4_NFT}<br>Primary Education: {T10_4_PT}<br>Lower Secondary: {T10_4_LST}<br>Upper Secondary: {T10_4_UST}<br>Technical/Vocational Qualification: {T10_4_TVT}<br>Advanced Cert/Apprenticeship: {T10_4_ACCAT}<br>Higher Certificate: {T10_4_HCT}<br>Ordinary Bachelor: {T10_4_ODNDT}<br>Honours Bachelor: {T10_4_HDPQT}<br>Postgraduate Degree: {T10_4_PDT}<br>Doctorate(Ph.D): {T10_4_DT}<br>Not Stated: {T10_4_NST}<br>Total: {T10_4_TT}";
-popEducation.bindPopup(function(layer){
-	return L.Util.template(popUpTemplate, layer.feature.properties);
+var query = L.esri.query({
+	url: 'https://services1.arcgis.com/eNO7HHeQ3rUcBllm/arcgis/rest/services/Census2016_Theme10Table4_SA/FeatureServer/0/'
 });
+
+// var popUpTemplate = "<h3>{EDNAME}</h3>Total Male Population: {T1_1AGETM}<br>Total Female Population: {T1_1AGETF}<br>Total Population: {T1_1AGETT}<br><br>------------------------<br><h4>Total Education Levels</h4>No Formal Education: {T10_4_NFT}<br>Primary Education: {T10_4_PT}<br>Lower Secondary: {T10_4_LST}<br>Upper Secondary: {T10_4_UST}<br>Technical/Vocational Qualification: {T10_4_TVT}<br>Advanced Cert/Apprenticeship: {T10_4_ACCAT}<br>Higher Certificate: {T10_4_HCT}<br>Ordinary Bachelor: {T10_4_ODNDT}<br>Honours Bachelor: {T10_4_HDPQT}<br>Postgraduate Degree: {T10_4_PDT}<br>Doctorate(Ph.D): {T10_4_DT}<br>Not Stated: {T10_4_NST}<br>Total: {T10_4_TT}";
+// popEducation.bindPopup(function(layer){
+// 	return L.Util.template(popUpTemplate, layer.feature.properties);
+// });
+
+L.easyButton('<span class="delete">&cross;</span>', function() {
+	map.removeLayer(circle);
+	map.removeLayer(marker);
+	console.log("Zone removed.");
+}, title="Remove Current Zone").addTo(map);
+
+function onMapClick(e) {
+    marker.setLatLng(e.latlng).addTo(map);
+    if(circle != undefined) {
+    	map.removeLayer(circle);
+    }
+    circle = L.circle(e.latlng, {
+    	color: '#936c74',
+    	fillColor: '#f03',
+    	fillOpacity: 0.2,
+    	radius: 1000
+    }).addTo(map);
+    map.panTo(e.latlng); // for fun
+    marker.bindPopup("<h3>This is a test popup.</h3>This is where information from a database might show up."+"<br><br>"+e.latlng);
+    //console.log(circle.getPane());
+    query.overlaps(polygon2);
+    query.run(function(error, featureCollection, response) {
+    	console.log("Purple overlaps query found " + featureCollection.features.length + ' features');
+    });
+}
+
+
+
+// Spatial analysis: [1] https://github.com/turfjs/turf 
+//					 [2] https://esri.github.io/esri-leaflet/examples/spatial-queries.html
 
 // $.getJSON("https://opendata.arcgis.com/datasets/f1036513a92543c4a041424c2a455af7_0.geojson", function(data){
 // 	L.geoJSON(data, {
@@ -67,12 +108,6 @@ popEducation.bindPopup(function(layer){
 // 		}
 // 	}).addTo(map);
 // })
-  
-L.easyButton('<span class="delete">&cross;</span>', function() {
-	map.removeLayer(circle);
-	map.removeLayer(marker);
-	console.log("Zone removed.");
-}, title="Remove Current Zone").addTo(map);
 
 // info.onAdd = function (map) {
 // 	this._div = L.DomUtil.create('div', 'info'); //create div with class 'info'
@@ -83,23 +118,6 @@ L.easyButton('<span class="delete">&cross;</span>', function() {
 //     this._div.innerHTML = "";
 // };
 // info.addTo(map);
-
-function onMapClick(e) {
-    marker.setLatLng(e.latlng).addTo(map);
-    if(circle != undefined) {
-    	map.removeLayer(circle);
-    }
-    circle = L.circle(e.latlng, {
-    	color: '#936c74',
-    	fillColor: '#f03',
-    	fillOpacity: 0.2,
-    	radius: 1000
-    }).addTo(map);
-    marker.bindPopup("<h3>This is a test popup.</h3>This is where information from a database might show up."+"<br><br>"+e.latlng);
-}
-
-// Spatial analysis: [1] https://github.com/turfjs/turf 
-//					 [2] https://esri.github.io/esri-leaflet/examples/spatial-queries.html
 
 </script>
 
